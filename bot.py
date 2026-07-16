@@ -27,4 +27,4 @@ if __name__ == "__main__":
     while True:
         check_jobs()
         # الفحص كل ساعة (3600 ثانية) - يمكنك تعديل الوقت كما تحب
-        time.sleep(3600)+++
+time.sleep(3600)
