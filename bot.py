@@ -5,7 +5,7 @@ import threading
 import sys
 
 # ضع التوكن والقناة الخاصة بك هنا
-TOKEN = '8926649236:AAGKwtXftZUlCgJvk46NYbrKY8HWl2SSe6c'
+TOKEN ='8926649236:AAGKwtXftZUICgJvk46NYbrKY8HWl2SSe6c'
 CHANNEL_ID = '@Hail_Jobs_Channel_2026'
 
 bot = telebot.TeleBot(TOKEN)
