@@ -28,15 +28,14 @@ def run_web_server():
     httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
     httpd.serve_forever()
 
-# دالة البحث الشامل باستخدام خلاصة بحث Google للوظائف في حائل
+# دالة البحث الشامل باستخدام خلاصة بحث Google للوظائف في حائل لعام 2026
 def google_search_hail_jobs():
-    print("🔎 رادار جوجل يبحث الآن في الويب عن وظائف حائل الفعلية فقط...", flush=True)
+    print("🔎 رادار جوجل يبحث الآن في الويب عن وظائف حائل لعام 2026 فقط...", flush=True)
     try:
-        # استعلام البحث لجوجل للتركيز على وظائف منطقة حائل
-        query = 'وظائف حائل'
+        # تحديد البحث لعام 2026 لضمان حداثة الإعلانات
+        query = 'وظائف حائل 2026'
         encoded_query = urllib.parse.quote(query)
         
-        # استخدام خلاصة أخبار جوجل للبحث بلحظتها في كل المواقع والمنصات
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=ar&gl=SA&ceid=SA:ar"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
@@ -48,23 +47,24 @@ def google_search_hail_jobs():
         
         found_any = False
         
-        # كلمات دلالية واسعة جداً تدل على وجود فرصة عمل (لن تفوت أي وظيفة بإذن الله)
+        # كلمات دلالية تدل على وظيفة
         job_keywords = [
             "وظيفة", "وظائف", "تقديم", "توظيف", "شاغرة", "حراسات", "أمن", "عسكرية", 
             "مطلوب", "تعلن", "يعلن", "فرص", "شاغر", "بند", "شواغر", "مؤسسة", "شركة", 
             "مسابقة", "تعيين", "رواتب", "وظايف", "طرح", "شغل", "توظف"
         ]
         
-        # كلمات ممنوعة تدل على أنها مجرد أخبار عامة وليست فرصة تقديم
+        # كلمات ممنوعة تدل على أخبار عامة أو قديمة
         exclude_keywords = [
             "وفاة", "حادث", "طقس", "أمطار", "سمو", "الأمير", "زيارة", "افتتاح", 
             "تدشين", "ندوة", "بطولة", "مباراة", "حريق", "مرور", "قبض", "ضبط"
         ]
         
-        # مسح نتائج البحث من كل المواقع عبر الإنترنت
-        for item in root.findall('.//item')[:20]:  # فحص أول 20 نتيجة بحث حديثة
+        # مسح نتائج البحث
+        for item in root.findall('.//item')[:20]:
             title = item.find('title').text
             link = item.find('link').text
+            pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ""
             
             # 1. التأكد من أن الإعلان يخص حائل
             has_location = any(word in title for word in ["حائل", "حايل"])
@@ -75,41 +75,39 @@ def google_search_hail_jobs():
             # 3. التأكد من خلو العنوان من الكلمات الإخبارية العامة
             has_exclude_keyword = any(word in title for word in exclude_keywords)
             
-            # تشغيل الفلتر الذكي
-            if has_location and has_job_keyword and not has_exclude_keyword:
+            # 4. فلترة تاريخ النشر (يجب ألا يحتوي التاريخ على سنوات قديمة مثل 2021 أو 2022 أو 2023 أو 2024 أو 2025)
+            is_old = any(old_year in pub_date or old_year in title for old_year in ["2021", "2022", "2023", "2024", "2025"])
+            
+            # تشغيل الفلتر الذكي الحصري لـ 2026
+            if has_location and has_job_keyword and not has_exclude_keyword and not is_old:
                 found_any = True
                 if link not in sent_jobs:
                     sent_jobs.add(link)
                     
-                    # صياغة رسالة الرادار الشامل بوضوح واحترافية
-                    message = f"🎯 **وظيفة جديدة مكتشفة في حائل!**\n\n" \
+                    message = f"🎯 **وظيفة جديدة مكتشفة في حائل (2026)!**\n\n" \
                               f"📌 **الإعلان:** {title}\n\n" \
                               f"🔗 **رابط التفاصيل والتقديم:**\n{link}\n\n" \
-                              f"🤖 _رادار حائل يمسح الويب على مدار الساعة_"
+                              f"🤖 _رادار حائل 2026 الذكي_"
                     
                     bot.send_message(CHANNEL_ID, message, parse_mode='Markdown')
-                    print(f"✅ تم نشر وظيفة حقيقية: {title}", flush=True)
+                    print(f"✅ تم نشر وظيفة حقيقية وحديثة: {title}", flush=True)
                     time.sleep(2)
                     
         if not found_any:
-            print("💤 تم فحص الويب بنجاح، ولم نجد إعلانات توظيف جديدة تخص حائل حالياً.", flush=True)
+            print("💤 لم نجد إعلانات توظيف جديدة وحصريّة لعام 2026 في هذا الفحص.", flush=True)
             
     except Exception as e:
         print(f"❌ حدث خطأ أثناء بحث جوجل: {e}", flush=True)
 
 # حلقة التكرار الأساسية للبوت
 def bot_loop():
-    # رسالة التنبيه الفوري بالتشغيل
     try:
-        bot.send_message(CHANNEL_ID, "🟢 تم تشغيل رادار حائل الذكي! البوت الآن متصل ويبحث عن (الوظائف الحقيقية فقط) ويستبعد الأخبار العامة...")
+        bot.send_message(CHANNEL_ID, "🟢 تم تشغيل رادار حائل 2026 الذكي! جاري الفحص واستبعاد أي إعلانات من السنوات السابقة تلقائياً...")
     except Exception as e:
         print(f"❌ فشل إرسال رسالة التشغيل: {e}", flush=True)
 
     while True:
-        # فحص الإنترنت فوراً
         google_search_hail_jobs()
-        
-        # فحص الإنترنت كل ساعتين (7200 ثانية) للحصول على أفضل النتائج وتفادي تكرار الفحص السريع
         print("🕒 في وضع الانتظار لمدة ساعتين قبل مسح الويب القادم...", flush=True)
         time.sleep(7200)
 
