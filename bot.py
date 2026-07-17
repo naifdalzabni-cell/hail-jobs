@@ -2,6 +2,7 @@ import time
 import telebot
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+import sys
 
 # ضع التوكن والقناة الخاصة بك هنا
 TOKEN = '8926649236:AAGKwtXftZUlCgJvk46NYbrKY8HWl2SSe6c'
@@ -20,36 +21,30 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 def run_web_server():
     server_address = ('0.0.0.0', 10000)
     httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-    print("سيرفر الويب الوهمي يعمل الآن...")
+    print("سيرفر الويب الوهمي يعمل الآن...", flush=True)
     httpd.serve_forever()
 
 # دالة فحص وجلب الوظائف
 def check_jobs():
-    print("جاري تشغيل البوت وفحص الوظائف...")
-    try:
-        # هنا يوضع كود سحب الوظائف الخاص بك
-        # مثال:
-        # new_jobs = fetch_latest_jobs()
-        pass
-    except Exception as e:
-        print(f"حدث خطأ أثناء الفحص: {e}")
+    print("جاري تشغيل البوت وفحص الوظائف...", flush=True)
 
 # حلقة التكرار اللانهائية لتبقى البوت حياً على السيرفر
 def bot_loop():
-    # إرسال رسالة تجريبية للقناة للتأكد من الربط والتشغيل
+    print("محاولة إرسال رسالة التجربة إلى القناة...", flush=True)
     try:
+        # إرسال الرسالة التجريبية مع إجبار الطباعة فوراً
         bot.send_message(CHANNEL_ID, "🟢 تم تشغيل رادار وظائف حائل بنجاح! البوت الآن متصل ويبحث عن الوظائف.")
-        print("تم إرسال رسالة التجربة إلى القناة بنجاح!")
+        print("✅ نجاح: تم إرسال رسالة التجربة إلى القناة بنجاح!", flush=True)
     except Exception as e:
-        print(f"فشل إرسال رسالة التجربة إلى القناة: {e}")
+        print(f"❌ فشل الإرسال: حدث خطأ أثناء إرسال الرسالة. السبب: {e}", flush=True)
 
-    print("...البوت بدأ العمل بنجاح")
+    print("...البوت بدأ العمل بنجاح ويبدأ الفحص الدوري...", flush=True)
     while True:
         check_jobs()
-        time.sleep(3600)  # الفحص كل ساعة (3600 ثانية)
+        time.sleep(3600)  # الفحص كل ساعة
 
 if __name__ == "__main__":
-    # تشغيل السيرفر الوهمي في خلفية منفصلة لتجنب خطأ Port timeout
+    # تشغيل السيرفر الوهمي في خلفية منفصلة
     web_thread = threading.Thread(target=run_web_server)
     web_thread.daemon = True
     web_thread.start()
