@@ -28,12 +28,12 @@ def run_web_server():
     httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
     httpd.serve_forever()
 
-# دالة البحث الشامل باستخدام خلاصة بحث Google للوظائف في حائل لعام 2026
+# دالة البحث الشامل باستخدام خلاصة بحث Google للوظائف في حائل
 def google_search_hail_jobs():
-    print("🔎 رادار جوجل يبحث الآن في الويب عن وظائف حائل لعام 2026 فقط...", flush=True)
+    print("🔎 رادار جوجل يبحث الآن في الويب عن وظائف حائل النشطة...", flush=True)
     try:
-        # تحديد البحث لعام 2026 لضمان حداثة الإعلانات
-        query = 'وظائف حائل 2026'
+        # البحث بكلمة عامة تضمن جلب إعلانات التقديم المتاحة حالياً
+        query = 'وظائف حائل'
         encoded_query = urllib.parse.quote(query)
         
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=ar&gl=SA&ceid=SA:ar"
@@ -63,7 +63,7 @@ def google_search_hail_jobs():
         ]
         
         # مسح نتائج البحث
-        for item in root.findall('.//item')[:20]:
+        for item in root.findall('.//item')[:25]: # فحص أعمق لأول 25 نتيجة
             title = item.find('title').text
             link = item.find('link').text
             pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ""
@@ -77,26 +77,27 @@ def google_search_hail_jobs():
             # 3. التأكد من خلو العنوان تماماً من الكلمات الإخبارية والرسمية الممنوعة
             has_exclude_keyword = any(word in title for word in exclude_keywords)
             
-            # 4. فلترة تاريخ النشر (تجنب السنوات السابقة)
-            is_old = any(old_year in pub_date or old_year in title for old_year in ["2021", "2022", "2023", "2024", "2025"])
+            # 4. فلترة تاريخ النشر (نستبعد فقط السنوات القديمة جداً 2021 و 2022 و 2023 و 2024)
+            # وبذلك نسمح بظهور إعلانات 2025 المستمرة و 2026 الجديدة
+            is_very_old = any(old_year in pub_date or old_year in title for old_year in ["2021", "2022", "2023", "2024"])
             
-            # تشغيل الفلتر الذكي الحصري لـ 2026 والآمن من الأخبار الرسمية
-            if has_location and has_job_keyword and not has_exclude_keyword and not is_old:
+            # تشغيل الفلتر الذكي المطور والمستقر
+            if has_location and has_job_keyword and not has_exclude_keyword and not is_very_old:
                 found_any = True
                 if link not in sent_jobs:
                     sent_jobs.add(link)
                     
-                    message = f"🎯 **وظيفة جديدة مكتشفة في حائل (2026)!**\n\n" \
+                    message = f"🎯 **وظيفة جديدة مكتشفة في حائل!**\n\n" \
                               f"📌 **الإعلان:** {title}\n\n" \
                               f"🔗 **رابط التفاصيل والتقديم:**\n{link}\n\n" \
-                              f"🤖 _رادار حائل 2026 الذكي_"
+                              f"🤖 _رادار حائل الذكي_"
                     
                     bot.send_message(CHANNEL_ID, message, parse_mode='Markdown')
-                    print(f"✅ تم نشر وظيفة حقيقية وحديثة: {title}", flush=True)
+                    print(f"✅ تم نشر وظيفة حقيقية ونشطة: {title}", flush=True)
                     time.sleep(2)
                     
         if not found_any:
-            print("💤 لم نجد إعلانات توظيف حقيقية جديدة وحصريّة لعام 2026 حالياً.", flush=True)
+            print("💤 لم نجد إعلانات توظيف جديدة وحصريّة حالياً تفي بالشروط المحدثة.", flush=True)
             
     except Exception as e:
         print(f"❌ حدث خطأ أثناء بحث جوجل: {e}", flush=True)
@@ -104,7 +105,7 @@ def google_search_hail_jobs():
 # حلقة التكرار الأساسية للبوت
 def bot_loop():
     try:
-        bot.send_message(CHANNEL_ID, "🟢 تم تحديث رادار حائل 2026! البوت الحين صار أذكى بكثير ويستبعد أخبار الإمارة والاستقبالات الرسمية تماماً.")
+        bot.send_message(CHANNEL_ID, "🟢 تم تحديث رادار حائل! البوت الحين مبرمج بمرونة أكبر ليصيد وظائف 2025 المتاحة و 2026 الجديدة مع استبعاد الإعلانات القديمة جداً.")
     except Exception as e:
         print(f"❌ فشل إرسال رسالة التشغيل: {e}", flush=True)
 
